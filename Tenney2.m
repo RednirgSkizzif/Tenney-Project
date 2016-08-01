@@ -48,13 +48,13 @@ classdef Tenney < handle
             temp = str2double(currentTemp(x:maxIndex));
         end
         
-        function  stepUp(obj,start,stop,N,T)
-            step = (stop-start)/N;
+        function  step(obj,start,stop,N,T)
+            stepSize = (stop-start)/N;
             stepSoak=T*60;
             tic;
             
             for i = 0:N
-                SP = start+i*step;
+                SP = start+i*stepSize;
                 obj.setPoint(SP);
                 ntcTemp = obj.readArduino();
                 
@@ -76,33 +76,7 @@ classdef Tenney < handle
             end
             
         end
-        function stepDown(obj,start,stop,N,T)
-            step = (start-stop)/N;
-            stepSoak=T*60;
-            tic;
-            
-            for i = 0:N
-                SP = start-i*step;
-                obj.setPoint(SP);
-                ntcTemp = obj.readArduino();
-                
-                while ntcTemp > (SP+obj.Temperature_Acceptance) || ntcTemp < (SP-obj.Temperature_Acceptance)
-                    pause(1)
-                    ntcTemp=obj.readArduino();
-                   lap=toc;
-                   display(lap);
-                    %datalog
-                    dummyData = [obj.data,ntcTemp];
-                    obj.data = dummyData;
-                    dummyTime = [obj.time,lap];
-                    obj.time=dummyTime;
-                    
-                end
-                display('SETPOINT REACHED');
-                 obj.soak(stepSoak);
-            end
-            
-        end
+
         function ntc = readArduino(obj)
                 ntc = obj.ard.readNTC();
                 display(ntc);
